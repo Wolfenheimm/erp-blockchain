@@ -10,6 +10,9 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+mod types;
+mod core;
+
 // Re-export all pallet parts, this is needed to properly import the pallet into the runtime.
 pub use pallet::*;
 
@@ -27,11 +30,15 @@ pub mod pallet {
 		type RuntimeEvent: IsType<<Self as frame_system::Config>::RuntimeEvent> + From<Event<Self>>;
 
 		/// A parameterize-able value that we receive later via the `Get<_>` trait.
-		type Sku: Get<u32>;
+		type LotNumber: Get<u32>;
 
 		type Qty: Get<u32>;
 
 		type Weight: Get<u32>;
+
+		type PurchaseDate: Get<u32>;
+
+		type ExpirationDate: Get<u32>;
 	}
 
 	/// A mandatory struct in each pallet. All functions callable by external users (aka.
@@ -46,10 +53,11 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Event emitted when a new random seed is available from the relay chain
 		AddNewItem {
-			random_hash: T::AccountId,
+			//random_hash: BoundedVec<u8, ConstU8>,
+			sender: T::AccountId,
 			sku: u128,
 			qty: u128,
-			weight: u16,
+			weight: u32,
 		},
 	}
 
@@ -57,6 +65,20 @@ pub mod pallet {
 	/// of the blockchain.
 	#[pallet::storage]
 	pub type Value<T> = StorageValue<Value = u128>;
+
+	pub struct Item {
+		user: u128,
+		qty: u32,
+		weight: u32,
+	}
+	// #[pallet::storage]
+	// pub type Inventory<T: Config> = StorageMap<
+	// 	_,
+	// 	Blake2_128Concat,
+	// 	T::Sku,
+	// 	Item,
+	// 	ValueQuery,
+	// >;
 
 	/// All *dispatchable* call functions (aka. transactions) are attached to `Pallet` in a
 	/// `impl` block.
@@ -67,16 +89,19 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			sku: u128,
 			qty: u128,
-			weight: u16
+			weight: u32
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
+
+
+
 			// Emit an event detailing that a new randomness is available
-			Self::deposit_event(Event::AddNewItem {
-				random_hash: who,
-				sku,
-				qty,
-				weight,
-			});
+			// Self::deposit_event(Event::AddNewItem {
+			// 	//random_hash: who,
+			// 	sku,
+			// 	qty,
+			// 	weight,
+			// });
 
 			Ok(())
 		}
