@@ -1,15 +1,15 @@
+use crate::Config;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame::prelude::BoundedVec;
 use sp_core::ConstU32;
-use crate::Config;
-
+use sp_runtime::AccountId32;
 
 //pub type Sku = BoundedVec<u8, ConstU8<16>>;
 // Ephemeral metadata of an inventory item.
 #[derive(Encode, Decode, MaxEncodedLen, Debug, PartialEq, Eq, Clone)]
 pub struct InventoryItemMetadata<T: Config> {
     // AccountId of the user who moved the inventory item to its destination.
-    pub moved_by: T::AccountId,
+    pub moved_by: AccountId32,
     // The location of the item in inventory
     pub lot_number: T::LotNumber,
     // The item's SKU
@@ -22,4 +22,12 @@ pub struct InventoryItemMetadata<T: Config> {
     pub purchase_date: T::PurchaseDate,
     // The item's expiration date, if any
     pub expiration_date: T::ExpirationDate,
+}
+
+#[derive(Encode, Decode, MaxEncodedLen, Debug, Clone)]
+pub struct Item {
+    pub sku: BoundedVec<u8, ConstU32<16>>,
+    pub creator: AccountId32,
+    pub qty: u32,
+    pub weight: u32,
 }

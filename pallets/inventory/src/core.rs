@@ -1,36 +1,31 @@
-use frame::prelude::{DispatchError, ensure};
+use crate::AccountId32;
+use crate::{
+    pallet::{self, Pallet},
+    types::Item,
+    Value,
+};
+use frame::prelude::{BoundedVec, DispatchError};
+use sp_core::ConstU32; // Add this import
 
-/// Create a bucket for an owner (user) under a given MSP account.
-pub(crate) fn do_create_bucket(
-    sender: u32,
+impl<T> Pallet<T>
+where
+    T: pallet::Config,
+{
+    pub(crate) fn do_request_storage(
+        creator: sp_core::crypto::AccountId32,
+        sku: BoundedVec<u8, ConstU32<16>>,
+        qty: u32,
+        weight: u32,
+    ) -> Result<(), DispatchError> {
+        let item = Item {
+            sku,
+            creator,
+            qty,
+            weight,
+        };
 
-    private: bool,
-) -> Result<(), DispatchError> {
-    // TODO: Hold user funds for the bucket creation.
-
-    // Check if the MSP is indeed an MSP.
-    // ensure!(
-    //         <T::Providers as ReadProvidersInterface>::is_msp(&msp_id),
-    //         Error::<T>::NotAMsp
-    //     );
-
-    // // Create collection only if bucket is private
-    // let maybe_collection_id = if private {
-    //     // The `owner` of the collection is also the admin of the collection since most operations require the sender to be the admin.
-    //     Some(Self::create_collection(sender.clone())?)
-    // } else {
-    //     None
-    // };
-    //
-    // let bucket_id = <T as crate::Config>::Providers::derive_bucket_id(&sender, name);
-
-    // <T::Providers as MutateProvidersInterface>::add_bucket(
-    //     msp_id,
-    //     sender,
-    //     bucket_id,
-    //     private,
-    //     maybe_collection_id.clone(),
-    // )?;
-
-    Ok(())
+        // Store the item in the blockchain storage
+        //Value::<T>::put(item);
+        Ok(())
+    }
 }

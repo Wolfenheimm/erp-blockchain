@@ -24,6 +24,7 @@ frame = { features = [
 chrono = "0.4.38"
 pallet-timestamp = { workspace = true }
 sp-core = { workspace = true }
+sp-runtime = { workspace = true }
 serde = { workspace = true }
 
 [features]
