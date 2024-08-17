@@ -13,21 +13,18 @@
 mod core;
 mod types;
 
-// Re-export all pallet parts, this is needed to properly import the pallet into the runtime.
-
 pub use pallet::*;
-pub use sp_core::crypto::AccountId32;
 
 #[frame::pallet(dev_mode)]
 pub mod pallet {
-    use crate::AccountId32;
+    pub use crate::types::Item;
     use frame::prelude::*;
 
     /// The configuration trait of a pallet. Mandatory. Allows a pallet to receive types at a
     /// later point from the runtime that wishes to contain it. It allows the pallet to be
     /// parameterized over both types and values.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + scale_info::TypeInfo {
         /// A type that is not known now, but the runtime that will contain this pallet will
         /// know it later, therefore we define it here as an associated type.
         type RuntimeEvent: IsType<<Self as frame_system::Config>::RuntimeEvent> + From<Event<Self>>;
@@ -42,8 +39,13 @@ pub mod pallet {
         type PurchaseDate: Get<u32>;
 
         type ExpirationDate: Get<u32>;
+    }
 
-        type AccountId: T::AccountId;
+    #[pallet::error]
+    pub enum Error<T> {
+        /// Error indicating that the conversion failed.
+        ConversionFailed,
+        // Other error variants...
     }
 
     /// A mandatory struct in each pallet. All functions callable by external users (aka.
@@ -59,17 +61,17 @@ pub mod pallet {
         /// Event emitted when a new random seed is available from the relay chain
         AddNewItem {
             //random_hash: BoundedVec<u8, ConstU8>,
-            sender: AccountId32,
+            sender: T::AccountId,
             sku: BoundedVec<u8, ConstU32<16>>,
             qty: u128,
-            weight: u32,
+            weight: u128,
         },
     }
 
     /// A storage item that this pallet contains. This will be part of the state root trie
     /// of the blockchain.
     #[pallet::storage]
-    pub type Value<T> = StorageValue<Value = u128>;
+    pub type Value<T: Config> = StorageValue<Value = Item<T>>;
 
     /// All *dispatchable* call functions (aka. transactions) are attached to `Pallet` in a
     /// `impl` block.
@@ -80,12 +82,12 @@ pub mod pallet {
             origin: OriginFor<T>,
             sku: BoundedVec<u8, ConstU32<16>>,
             qty: u128,
-            weight: u32,
+            weight: u128,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
             // Request storage of the new item
-            Self::do_request_storage(who, sku, qty, weight)?;
+            Self::do_inventory_insertion(&who, &sku, qty, weight)?;
 
             // Emit an event detailing that a new randomness is available
             Self::deposit_event(Event::AddNewItem {
