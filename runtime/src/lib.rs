@@ -168,7 +168,6 @@ impl pallet_transaction_payment::Config for Runtime {
 // Implements the types required for the inventory pallet.
 impl pallet_inventory::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
-
     type LotNumber = ConstU32<40>;
     //type Sku = ConstU32<40>;
     type Qty = ConstU32<40>;

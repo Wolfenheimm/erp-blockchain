@@ -19,12 +19,13 @@ pub use pallet::*;
 pub mod pallet {
     pub use crate::types::Item;
     use frame::prelude::*;
+    use sp_std::vec::Vec;
 
     /// The configuration trait of a pallet. Mandatory. Allows a pallet to receive types at a
     /// later point from the runtime that wishes to contain it. It allows the pallet to be
     /// parameterized over both types and values.
     #[pallet::config]
-    pub trait Config: frame_system::Config + scale_info::TypeInfo {
+    pub trait Config: frame_system::Config {
         /// A type that is not known now, but the runtime that will contain this pallet will
         /// know it later, therefore we define it here as an associated type.
         type RuntimeEvent: IsType<<Self as frame_system::Config>::RuntimeEvent> + From<Event<Self>>;
@@ -71,7 +72,7 @@ pub mod pallet {
     /// A storage item that this pallet contains. This will be part of the state root trie
     /// of the blockchain.
     #[pallet::storage]
-    pub type Value<T: Config> = StorageValue<Value = Item<T>>;
+    pub type Value<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Item<T>>>;
 
     /// All *dispatchable* call functions (aka. transactions) are attached to `Pallet` in a
     /// `impl` block.
