@@ -19,13 +19,14 @@ pub use pallet::*;
 pub mod pallet {
     pub use crate::types::Item;
     use frame::prelude::*;
+    use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
 
     /// The configuration trait of a pallet. Mandatory. Allows a pallet to receive types at a
     /// later point from the runtime that wishes to contain it. It allows the pallet to be
     /// parameterized over both types and values.
     #[pallet::config]
-    pub trait Config: frame_system::Config {
+    pub trait Config: frame_system::Config + timestamp::Config {
         /// A type that is not known now, but the runtime that will contain this pallet will
         /// know it later, therefore we define it here as an associated type.
         type RuntimeEvent: IsType<<Self as frame_system::Config>::RuntimeEvent> + From<Event<Self>>;
@@ -64,8 +65,9 @@ pub mod pallet {
             //random_hash: BoundedVec<u8, ConstU8>,
             sender: T::AccountId,
             sku: BoundedVec<u8, ConstU32<16>>,
-            qty: u128,
-            weight: u128,
+            qty: u32,
+            weight: u32,
+            shelf_life: u32,
         },
     }
 
@@ -82,13 +84,14 @@ pub mod pallet {
         pub fn inventory_insertion(
             origin: OriginFor<T>,
             sku: BoundedVec<u8, ConstU32<16>>,
-            qty: u128,
-            weight: u128,
+            qty: u32,
+            weight: u32,
+            shelf_life: u32,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
             // Request storage of the new item
-            Self::do_inventory_insertion(&who, &sku, qty, weight)?;
+            Self::do_inventory_insertion(&who, &sku, qty, weight, shelf_life)?;
 
             // Emit an event detailing that a new randomness is available
             Self::deposit_event(Event::AddNewItem {
@@ -96,6 +99,7 @@ pub mod pallet {
                 sku,
                 qty,
                 weight,
+                shelf_life,
             });
 
             Ok(())
