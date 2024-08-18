@@ -4,7 +4,6 @@ use frame_system::Config;
 use scale_info::TypeInfo;
 use sp_core::{ConstU32, RuntimeDebug};
 
-// Define the Item struct
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default, MaxEncodedLen, TypeInfo)]
 #[scale_info(skip_type_params(T))]
 pub struct Item<T: Config> {

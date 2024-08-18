@@ -1,9 +1,7 @@
-use crate::{pallet::Pallet, types::Item};
-use frame_support::dispatch_context::Value;
+use crate::{pallet::Pallet, types::Item, Config, Error, Value};
+use frame_support::dispatch::DispatchResult;
 use frame_support::BoundedVec;
-use frame_system::Config;
 use sp_core::ConstU32;
-use sp_runtime::DispatchResult; // Add this import
 
 impl<T: Config> Pallet<T> {
     pub fn do_inventory_insertion(
@@ -20,10 +18,17 @@ impl<T: Config> Pallet<T> {
         };
 
         // Fetch the existing vector of items for the account
-        let mut items = <Value<T>>::get(who).unwrap_or_default();
+        let mut items = <Value<T>>::get(who).unwrap_or_else(|| BoundedVec::default());
 
-        // Add the new item to the vector
-        items.push(item);
+        // Ensure we don't exceed the maximum capacity of the BoundedVec
+        if items.len() >= items.capacity() {
+            return Err(Error::<T>::ExceedsMaxItems.into());
+        }
+
+        // Add the new item to the BoundedVec
+        items
+            .try_push(item)
+            .map_err(|_| Error::<T>::ExceedsMaxItems)?;
 
         // Store the updated vector back in storage
         <Value<T>>::insert(who, items);
