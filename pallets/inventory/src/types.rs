@@ -1,16 +1,24 @@
 use crate::Config;
-use codec::{Decode, Encode, MaxEncodedLen};
-use frame::prelude::{BoundedVec, ConstU32};
+use codec::{Decode, Encode};
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 
+// ABC code selections
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo, Default)]
+pub enum AbcCode {
+    #[default]
+    A,
+    B,
+    C,
+}
+
 // Define the Item struct
-#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default, MaxEncodedLen, TypeInfo)]
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default, TypeInfo)]
 #[scale_info(skip_type_params(T))]
 pub struct Item<T: Config> {
     pub moved_by: T::AccountId,
     pub lot_number: u32,
-    pub abc_code: BoundedVec<u8, ConstU32<1>>,
+    pub abc_code: AbcCode,
     pub inventory_type: u32,
     pub product_type: u32,
     pub qty: u32,
