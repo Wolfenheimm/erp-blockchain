@@ -18,7 +18,7 @@ pub use pallet::*;
 #[frame::pallet(dev_mode)]
 pub mod pallet {
     pub use crate::types::Item;
-    use frame::prelude::{storage::StorageDoubleMap, *};
+    use frame::prelude::*;
     use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
 
@@ -27,26 +27,25 @@ pub mod pallet {
     /// parameterized over both types and values.
     #[pallet::config]
     pub trait Config: frame_system::Config + timestamp::Config {
-        /// A type that is not known now, but the runtime that will contain this pallet will
-        /// know it later, therefore we define it here as an associated type.
         type RuntimeEvent: IsType<<Self as frame_system::Config>::RuntimeEvent> + From<Event<Self>>;
-
-        /// A parameterize-able value that we receive later via the `Get<_>` trait.
         type LotNumber: Get<u32>;
-
         type Qty: Get<u32>;
-
         type Weight: Get<u32>;
-
         type PurchaseDate: Get<u32>;
-
         type ExpirationDate: Get<u32>;
+        type Sku: Parameter
+        + Member
+        + MaybeSerializeDeserialize
+        + MaxEncodedLen
+        + Default
+        + TypeInfo;
     }
 
     #[pallet::error]
     pub enum Error<T> {
         /// Error indicating that the conversion failed.
         ConversionFailed,
+        InvalidAbcCode,
         // Other error variants...
     }
 
@@ -62,11 +61,15 @@ pub mod pallet {
     pub enum Event<T: Config> {
         /// Event emitted when a new random seed is available from the relay chain
         AddNewItem {
-            //random_hash: BoundedVec<u8, ConstU8>,
             sender: T::AccountId,
-            sku: BoundedVec<u8, ConstU32<16>>,
+            sku: T::Sku,
+            lot_number: u32,
+            abc_code: BoundedVec<u8, ConstU32<1>>,
+            inventory_type: u32,
+            product_type: u32,
             qty: u32,
             weight: u32,
+            cycle_count: u32,
             shelf_life: u32,
         },
     }
@@ -76,11 +79,12 @@ pub mod pallet {
     #[pallet::storage]
     pub type Value<T: Config> = StorageDoubleMap<
         _,
-        Blake2_128Concat,
-        T::AccountId,
-        Blake2_128Concat,
-        Vec<Company<T>>,
-        Vec<Item<T>>,
+        Blake2_128Concat, // Hasher1
+        T::AccountId,     // Key1
+        Blake2_128Concat, // Hasher2
+        T::Sku,           // Key2
+        Vec<Item<T>>,     // Value
+        OptionQuery,
     >;
 
     /// All *dispatchable* call functions (aka. transactions) are attached to `Pallet` in a
@@ -90,22 +94,32 @@ pub mod pallet {
         /// This will be callable by external users, and has two u32s as a parameter.
         pub fn inventory_insertion(
             origin: OriginFor<T>,
-            sku: BoundedVec<u8, ConstU32<16>>,
+            sku: T::Sku,
+            lot_number: u32,
+            abc_code: BoundedVec<u8, ConstU32<1>>,
+            inventory_type: u32,
+            product_type: u32,
             qty: u32,
             weight: u32,
+            cycle_count: u32,
             shelf_life: u32,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
             // Request storage of the new item
-            Self::do_inventory_insertion(&who, &sku, qty, weight, shelf_life)?;
+            Self::do_inventory_insertion(&who, &sku, lot_number, &abc_code, inventory_type, product_type, qty, weight, cycle_count, shelf_life)?;
 
             // Emit an event detailing that a new randomness is available
             Self::deposit_event(Event::AddNewItem {
                 sender: who,
                 sku,
+                lot_number,
+                abc_code,
+                inventory_type,
+                product_type,
                 qty,
                 weight,
+                cycle_count,
                 shelf_life,
             });
 

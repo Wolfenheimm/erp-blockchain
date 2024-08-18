@@ -169,7 +169,7 @@ impl pallet_transaction_payment::Config for Runtime {
 impl pallet_inventory::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type LotNumber = ConstU32<40>;
-    //type Sku = ConstU32<40>;
+    type Sku = BoundedVec<u8, ConstU32<16>>;
     type Qty = ConstU32<40>;
     type Weight = ConstU32<40>;
     type PurchaseDate = ConstU32<40>;
