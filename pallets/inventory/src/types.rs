@@ -15,3 +15,12 @@ pub struct Item<T: Config> {
     pub shelf_life: u32,
     pub created_at: T::Moment,
 }
+
+// Define the Item struct
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default, MaxEncodedLen, TypeInfo)]
+#[scale_info(skip_type_params(T))]
+pub struct Company {
+    pub company_name: BoundedVec<u8, ConstU32<16>>,
+    pub company_subdivision: u8,
+    pub company_location: u8,
+}

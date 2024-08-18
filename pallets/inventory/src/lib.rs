@@ -18,7 +18,7 @@ pub use pallet::*;
 #[frame::pallet(dev_mode)]
 pub mod pallet {
     pub use crate::types::Item;
-    use frame::prelude::*;
+    use frame::prelude::{storage::StorageDoubleMap, *};
     use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
 
@@ -74,7 +74,14 @@ pub mod pallet {
     /// A storage item that this pallet contains. This will be part of the state root trie
     /// of the blockchain.
     #[pallet::storage]
-    pub type Value<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, Vec<Item<T>>>;
+    pub type Value<T: Config> = StorageDoubleMap<
+        _,
+        Blake2_128Concat,
+        T::AccountId,
+        Blake2_128Concat,
+        Vec<Company<T>>,
+        Vec<Item<T>>,
+    >;
 
     /// All *dispatchable* call functions (aka. transactions) are attached to `Pallet` in a
     /// `impl` block.
