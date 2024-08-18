@@ -17,8 +17,7 @@ pub use pallet::*;
 
 #[frame::pallet(dev_mode)]
 pub mod pallet {
-    pub use crate::types::Item;
-    pub use crate::types::AbcCode;
+    pub use crate::types::{Item, AbcCode, Sku};
     use frame::prelude::*;
     use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
@@ -29,12 +28,6 @@ pub mod pallet {
     #[pallet::config]
     pub trait Config: frame_system::Config + timestamp::Config {
         type RuntimeEvent: IsType<<Self as frame_system::Config>::RuntimeEvent> + From<Event<Self>>;
-        type Sku: Parameter
-        + Member
-        + MaybeSerializeDeserialize
-        + MaxEncodedLen
-        + Default
-        + TypeInfo;
     }
 
     #[pallet::error]
@@ -56,7 +49,7 @@ pub mod pallet {
         /// Event emitted when a new random seed is available from the relay chain
         AddNewItem {
             sender: T::AccountId,
-            sku: T::Sku,
+            sku: Sku,
             lot_number: u32,
             abc_code: AbcCode,
             inventory_type: u32,
@@ -76,7 +69,7 @@ pub mod pallet {
         Blake2_128Concat,
         T::AccountId,
         Blake2_128Concat,
-        T::Sku,
+        Sku,
         Vec<Item<T>>,
         OptionQuery,
     >;
@@ -85,7 +78,7 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         pub fn inventory_insertion(
             origin: OriginFor<T>,
-            sku: T::Sku,
+            sku: Sku,
             lot_number: u32,
             abc_code: AbcCode,
             inventory_type: u32,

@@ -1,9 +1,9 @@
 use crate::Config;
 use codec::{Decode, Encode};
+use frame::prelude::{BoundedVec, ConstU32};
 use scale_info::TypeInfo;
 use sp_core::RuntimeDebug;
 
-// ABC code selections
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo, Default)]
 pub enum AbcCode {
     #[default]
@@ -12,7 +12,8 @@ pub enum AbcCode {
     C,
 }
 
-// Define the Item struct
+pub type Sku = BoundedVec<u8, ConstU32<16>>;
+
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, Default, TypeInfo)]
 #[scale_info(skip_type_params(T))]
 pub struct Item<T: Config> {

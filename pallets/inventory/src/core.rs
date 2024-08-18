@@ -1,12 +1,12 @@
 use codec::{Encode, MaxEncodedLen};
-use crate::{pallet::Pallet, types::Item, AbcCode, Config, Value, Error};
+use crate::{pallet::Pallet, types::Item, types::Sku, AbcCode, Config, Value, Error};
 use sp_runtime::DispatchResult;
 use pallet_timestamp::{self as timestamp};
 
 impl<T: Config> Pallet<T> {
     pub fn do_inventory_insertion(
         who: &T::AccountId,
-        sku: &T::Sku,
+        sku: &Sku,
         lot_number: u32,
         abc_code: &AbcCode,
         inventory_type: u32,
@@ -31,7 +31,7 @@ impl<T: Config> Pallet<T> {
 
         // Ensure SKU length does not exceed 16
         let sku_encoded_len = sku.encode().len();
-        let max_encoded_len = T::Sku::max_encoded_len();
+        let max_encoded_len = Sku::max_encoded_len();
 
         if sku_encoded_len > max_encoded_len {
             return Err(Error::<T>::InvalidSkuLength.into());
