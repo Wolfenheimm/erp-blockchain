@@ -10,15 +10,16 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub use pallet::*;
+
 mod core;
 mod types;
 
-pub use pallet::*;
-
-#[frame::pallet(dev_mode)]
+#[frame_support::pallet]
 pub mod pallet {
     pub use crate::types::Item;
-    use frame::prelude::*;
+    use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
+    use frame_system::pallet_prelude::*;
     use sp_std::vec::Vec;
 
     /// The configuration trait of a pallet. Mandatory. Allows a pallet to receive types at a
@@ -78,7 +79,8 @@ pub mod pallet {
     /// `impl` block.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        /// This will be callable by external users, and has two u32s as a parameter.
+        #[pallet::call_index(0)]
+        #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn inventory_insertion(
             origin: OriginFor<T>,
             sku: BoundedVec<u8, ConstU32<16>>,

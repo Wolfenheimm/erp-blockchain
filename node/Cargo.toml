@@ -46,10 +46,13 @@ substrate-frame-rpc-system = { workspace = true, default-features = true }
 
 # Once the native runtime is gone, there should be little to no dependency on FRAME here, and
 # certainly no dependency on the runtime.
-frame = { features = [
-	"experimental",
-	"runtime",
-], workspace = true, default-features = true }
+frame-support = { workspace = true }
+frame-benchmarking = { workspace = true, optional = true }
+frame-executive = { workspace = true }
+frame-system = { workspace = true }
+frame-system-benchmarking = { workspace = true, optional = true }
+frame-system-rpc-runtime-api = { workspace = true }
+frame-try-runtime = { workspace = true, optional = true }
 minimal-template-runtime = { workspace = true }
 
 [build-dependencies]
