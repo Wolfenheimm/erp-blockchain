@@ -40,6 +40,7 @@ pub mod pallet {
     #[pallet::error]
     pub enum Error<T> {
         ConversionFailed,
+        InvalidSkuLength,
     }
 
     /// A mandatory struct in each pallet. All functions callable by external users (aka.
@@ -72,12 +73,12 @@ pub mod pallet {
     #[pallet::storage]
     pub type Value<T: Config> = StorageDoubleMap<
         _,
-        Blake2_128Concat,               // Hasher1
-        T::AccountId,                   // Key1
-        Blake2_128Concat,               // Hasher2
-        T::Sku,   // Key2
-        Vec<Item<T>>,                   // Value
-        OptionQuery,                    // Query
+        Blake2_128Concat,
+        T::AccountId,
+        Blake2_128Concat,
+        T::Sku,
+        Vec<Item<T>>,
+        OptionQuery,
     >;
 
     #[pallet::call]

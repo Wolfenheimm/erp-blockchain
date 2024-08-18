@@ -1,4 +1,5 @@
-use crate::{pallet::Pallet, types::Item, AbcCode, Config, Value};
+use codec::{Encode, MaxEncodedLen};
+use crate::{pallet::Pallet, types::Item, AbcCode, Config, Value, Error};
 use sp_runtime::DispatchResult;
 use pallet_timestamp::{self as timestamp};
 
@@ -27,6 +28,14 @@ impl<T: Config> Pallet<T> {
             shelf_life,
             created_at: <timestamp::Pallet<T>>::get(),
         };
+
+        // Ensure SKU length does not exceed 16
+        let sku_encoded_len = sku.encode().len();
+        let max_encoded_len = T::Sku::max_encoded_len();
+
+        if sku_encoded_len > max_encoded_len {
+            return Err(Error::<T>::InvalidSkuLength.into());
+        }
 
         // Fetch the existing vector of items for the account
         let mut items = <Value<T>>::get(who, sku).unwrap_or_default();
