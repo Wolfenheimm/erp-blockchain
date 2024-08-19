@@ -63,8 +63,16 @@ pub mod pallet {
         OptionQuery,
     >;
 
+
     #[pallet::call]
     impl<T: Config> Pallet<T> {
+        pub fn get_items(
+            origin: OriginFor<T>,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            Self::do_get_all_items(who);
+            Ok(())
+        }
         pub fn inventory_insertion(
             origin: OriginFor<T>,
             sku: Sku,

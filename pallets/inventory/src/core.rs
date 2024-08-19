@@ -3,8 +3,22 @@ use crate::{pallet::Pallet, Item, Sku, InventoryType, ProductType, AbcCode, Conf
 use sp_runtime::DispatchResult;
 use pallet_timestamp::{self as timestamp};
 use crate::types::{CycleCount, LotNumber, MovedByAccount, Qty, SerialNumber, ShelfLife, Weight};
+use scale_info::prelude::vec::Vec;
+
 
 impl<T: Config> Pallet<T> {
+    pub fn do_get_items_by_lot_number(account: T::AccountId, lot_number: LotNumber) -> Vec<Item<T>> {
+        <Value<T>>::iter_prefix(&account)
+            .flat_map(|(_, items)| items)
+            .filter(|item| item.lot_number == lot_number)
+            .collect()
+    }
+
+    pub fn do_get_all_items(account: T::AccountId) -> Vec<Item<T>> {
+        <Value<T>>::iter_prefix(&account)
+            .flat_map(|(_, items)| items)
+            .collect()
+    }
     pub fn do_inventory_insertion(
         who: &T::AccountId,
         sku: &Sku,
@@ -40,7 +54,7 @@ impl<T: Config> Pallet<T> {
         if sku_encoded_len > max_encoded_len {
             return Err(Error::<T>::InvalidSkuLength.into());
         }
-        
+
         let mut items = <Value<T>>::get(who, sku).unwrap_or_default();
         items.push(item);
         <Value<T>>::insert(who, sku, items);
