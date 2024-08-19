@@ -1,27 +1,29 @@
 use codec::{Encode, MaxEncodedLen};
-use crate::{pallet::Pallet, types::Item, types::Sku, AbcCode, Config, Value, Error};
+use crate::{pallet::Pallet, Item, Sku, InventoryType, ProductType, AbcCode, Config, Value, Error};
 use sp_runtime::DispatchResult;
 use pallet_timestamp::{self as timestamp};
+use crate::types::MovedByAccount;
 
 impl<T: Config> Pallet<T> {
     pub fn do_inventory_insertion(
         who: &T::AccountId,
         sku: &Sku,
+        moved_by: &MovedByAccount,
         lot_number: u32,
         abc_code: &AbcCode,
-        inventory_type: u32,
-        product_type: u32,
+        inventory_type: &InventoryType,
+        product_type: &ProductType,
         qty: u32,
         weight: u32,
         cycle_count: u32,
         shelf_life: u32,
     ) -> DispatchResult {
         let item: Item<T> = Item {
-            moved_by: who.clone(),
+            moved_by: moved_by.clone(),
             lot_number,
             abc_code: abc_code.clone(),
-            inventory_type,
-            product_type,
+            inventory_type: inventory_type.clone(),
+            product_type: product_type.clone(),
             qty,
             weight,
             cycle_count,

@@ -17,7 +17,7 @@ pub use pallet::*;
 
 #[frame::pallet(dev_mode)]
 pub mod pallet {
-    pub use crate::types::{Item, AbcCode, Sku};
+    pub use crate::types::{Item, AbcCode, InventoryType, ProductType, Sku, MovedByAccount};
     use frame::prelude::*;
     use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
@@ -50,10 +50,11 @@ pub mod pallet {
         AddNewItem {
             sender: T::AccountId,
             sku: Sku,
+            moved_by: MovedByAccount,
             lot_number: u32,
             abc_code: AbcCode,
-            inventory_type: u32,
-            product_type: u32,
+            inventory_type: InventoryType,
+            product_type: ProductType,
             qty: u32,
             weight: u32,
             cycle_count: u32,
@@ -79,10 +80,11 @@ pub mod pallet {
         pub fn inventory_insertion(
             origin: OriginFor<T>,
             sku: Sku,
+            moved_by: MovedByAccount,
             lot_number: u32,
             abc_code: AbcCode,
-            inventory_type: u32,
-            product_type: u32,
+            inventory_type: InventoryType,
+            product_type: ProductType,
             qty: u32,
             weight: u32,
             cycle_count: u32,
@@ -91,12 +93,13 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
 
             // Request storage of the new item
-            Self::do_inventory_insertion(&who, &sku, lot_number, &abc_code, inventory_type, product_type, qty, weight, cycle_count, shelf_life)?;
+            Self::do_inventory_insertion(&who, &sku, &moved_by, lot_number, &abc_code, &inventory_type, &product_type, qty, weight, cycle_count, shelf_life)?;
 
             // Emit an event detailing a new Item has been entered
             Self::deposit_event(Event::AddNewItem {
                 sender: who,
                 sku,
+                moved_by,
                 lot_number,
                 abc_code,
                 inventory_type,
