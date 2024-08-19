@@ -1,7 +1,3 @@
-//! A shell pallet built with [`frame`].
-//!
-//! To get started with this pallet, try implementing the guide in
-//! <https://paritytech.github.io/polkadot-sdk/master/polkadot_sdk_docs/guides/your_first_pallet/index.html>
 //TODO
 // Add storage for SKUs and associated metadata --
 // Transaction call to insert or delete SKUs --
@@ -23,9 +19,6 @@ pub mod pallet {
     use sp_std::vec::Vec;
     use crate::types::{CycleCount, LotNumber, Qty, SerialNumber, ShelfLife, Weight};
 
-    /// The configuration trait of a pallet. Mandatory. Allows a pallet to receive types at a
-    /// later point from the runtime that wishes to contain it. It allows the pallet to be
-    /// parameterized over both types and values.
     #[pallet::config]
     pub trait Config: frame_system::Config + timestamp::Config {
         type RuntimeEvent: IsType<<Self as frame_system::Config>::RuntimeEvent> + From<Event<Self>>;
@@ -37,17 +30,12 @@ pub mod pallet {
         InvalidSkuLength,
     }
 
-    /// A mandatory struct in each pallet. All functions callable by external users (aka.
-    /// transactions) must be attached to this type (see [`frame::pallet_macros::call`]). For
-    /// convenience, internal (private) functions can also be attached to this type.
     #[pallet::pallet]
     pub struct Pallet<T>(_);
 
-    /// The events that this pallet can emit.
     #[pallet::event]
     #[pallet::generate_deposit(pub(crate) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Event emitted when a new random seed is available from the relay chain
         AddNewItem {
             sender: T::AccountId,
             sku: Sku,
@@ -64,8 +52,6 @@ pub mod pallet {
         },
     }
 
-    /// A storage item that this pallet contains. This will be part of the state root trie
-    /// of the blockchain.
     #[pallet::storage]
     pub type Value<T: Config> = StorageDoubleMap<
         _,
@@ -95,10 +81,8 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            // Request storage of the new item
             Self::do_inventory_insertion(&who, &sku, &moved_by, &lot_number, &serial_number, &abc_code, &inventory_type, &product_type, &qty, &weight, &cycle_count, &shelf_life)?;
 
-            // Emit an event detailing a new Item has been entered
             Self::deposit_event(Event::AddNewItem {
                 sender: who,
                 sku,

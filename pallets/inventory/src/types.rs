@@ -38,7 +38,6 @@ pub enum InventoryType {
     Excess,
 }
 
-/// Define an enum for selectable accounts
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo, Default)]
 pub enum MovedByAccount {
     #[default]

@@ -40,14 +40,9 @@ impl<T: Config> Pallet<T> {
         if sku_encoded_len > max_encoded_len {
             return Err(Error::<T>::InvalidSkuLength.into());
         }
-
-        // Fetch the existing vector of items for the account
+        
         let mut items = <Value<T>>::get(who, sku).unwrap_or_default();
-
-        // Add the new item to the vector
         items.push(item);
-
-        // Store the updated vector back in storage
         <Value<T>>::insert(who, sku, items);
 
         Ok(())
