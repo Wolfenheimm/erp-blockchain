@@ -61,6 +61,7 @@ pub enum ProductType {
 #[scale_info(skip_type_params(T))]
 pub struct Item<T: Config> {
     pub moved_by: MovedByAccount,
+    pub sku: Sku,
     pub lot_number: LotNumber,
     pub serial_number: SerialNumber,
     pub abc_code: AbcCode,

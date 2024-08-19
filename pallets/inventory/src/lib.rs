@@ -53,12 +53,13 @@ pub mod pallet {
     }
 
     #[pallet::storage]
-    pub type Value<T: Config> = StorageDoubleMap<
+    pub type Value<T: Config> = StorageNMap<
         _,
-        Blake2_128Concat,
-        T::AccountId,
-        Blake2_128Concat,
-        Sku,
+        (
+            NMapKey<Blake2_128Concat, T::AccountId>,
+            NMapKey<Blake2_128Concat, Sku>,
+            NMapKey<Blake2_128Concat, LotNumber>,
+        ),
         Vec<Item<T>>,
         OptionQuery,
     >;
@@ -66,13 +67,6 @@ pub mod pallet {
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        pub fn get_items(
-            origin: OriginFor<T>,
-        ) -> DispatchResult {
-            let who = ensure_signed(origin)?;
-            Self::do_get_all_items(who);
-            Ok(())
-        }
         pub fn inventory_insertion(
             origin: OriginFor<T>,
             sku: Sku,
