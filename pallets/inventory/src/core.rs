@@ -42,9 +42,9 @@ impl<T: Config> Pallet<T> {
             return Err(Error::<T>::InvalidSkuLength.into());
         }
 
-        let mut items = <Value<T>>::get((who, sku, lot_number)).unwrap_or_default();
-        items.push(item);
-        <Value<T>>::insert((who, sku, lot_number), items);
+        let mut items = <Value<T>>::get((who, sku)).unwrap_or_default();
+        items.push((lot_number.clone(), item));
+        <Value<T>>::insert((who, sku), items);
 
         Ok(())
     }

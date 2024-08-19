@@ -58,9 +58,8 @@ pub mod pallet {
         (
             NMapKey<Blake2_128Concat, T::AccountId>,
             NMapKey<Blake2_128Concat, Sku>,
-            NMapKey<Blake2_128Concat, LotNumber>,
         ),
-        Vec<Item<T>>,
+        Vec<(LotNumber, Item<T>)>,
         OptionQuery,
     >;
 
