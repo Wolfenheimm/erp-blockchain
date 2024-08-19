@@ -13,7 +13,7 @@ pub use pallet::*;
 
 #[frame::pallet(dev_mode)]
 pub mod pallet {
-    pub use crate::types::{Item, AbcCode, InventoryType, ProductType, Sku, MovedByAccount};
+    pub use crate::types::{Item, Lot, AbcCode, InventoryType, ProductType, Sku, MovedByAccount};
     use frame::prelude::*;
     use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
@@ -59,7 +59,7 @@ pub mod pallet {
             NMapKey<Blake2_128Concat, T::AccountId>,
             NMapKey<Blake2_128Concat, Sku>,
         ),
-        Vec<(LotNumber, Item<T>)>,
+        Vec<(Lot, Vec<Item<T>>)>,
         OptionQuery,
     >;
 

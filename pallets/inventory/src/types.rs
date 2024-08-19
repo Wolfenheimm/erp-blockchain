@@ -73,3 +73,9 @@ pub struct Item<T: Config> {
     pub cycle_count: CycleCount,
     pub created_at: T::Moment,
 }
+
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
+pub struct Lot {
+    pub lot_number: LotNumber,
+}

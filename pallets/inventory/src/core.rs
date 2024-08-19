@@ -2,7 +2,9 @@ use codec::{Encode, MaxEncodedLen};
 use crate::{pallet::Pallet, Item, Sku, InventoryType, ProductType, AbcCode, Config, Value, Error};
 use sp_runtime::DispatchResult;
 use pallet_timestamp::{self as timestamp};
-use crate::types::{CycleCount, LotNumber, MovedByAccount, Qty, SerialNumber, ShelfLife, Weight};
+use crate::types::{Lot, CycleCount, LotNumber, MovedByAccount, Qty, SerialNumber, ShelfLife, Weight};
+use scale_info::prelude::vec;
+
 
 impl<T: Config> Pallet<T> {
     pub fn do_inventory_insertion(
@@ -34,6 +36,10 @@ impl<T: Config> Pallet<T> {
             created_at: <timestamp::Pallet<T>>::get(),
         };
 
+        let lot = Lot {
+            lot_number: lot_number.clone(),
+        };
+
         // Ensure SKU length does not exceed 16
         let sku_encoded_len = sku.encode().len();
         let max_encoded_len = Sku::max_encoded_len();
@@ -43,7 +49,24 @@ impl<T: Config> Pallet<T> {
         }
 
         let mut items = <Value<T>>::get((who, sku)).unwrap_or_default();
-        items.push((lot_number.clone(), item));
+
+        // Check if there's an existing lot with the given lot_number
+        let mut found_lot = false;
+
+        // Iterate through items to find the lot and update it
+        for (existing_lot, ref mut existing_items) in items.iter_mut() {
+            if &existing_lot.lot_number == lot_number {
+                existing_items.push(item.clone());
+                found_lot = true;
+                break;
+            }
+        }
+
+        if !found_lot {
+            // If no existing lot found, create a new lot and add the item
+            items.push((Lot { lot_number: lot_number.clone() }, vec![item]));
+        }
+
         <Value<T>>::insert((who, sku), items);
 
         Ok(())
