@@ -21,6 +21,7 @@ pub mod pallet {
     use frame::prelude::*;
     use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
+    use crate::types::{CycleCount, LotNumber, Qty, SerialNumber, ShelfLife, Weight};
 
     /// The configuration trait of a pallet. Mandatory. Allows a pallet to receive types at a
     /// later point from the runtime that wishes to contain it. It allows the pallet to be
@@ -51,14 +52,15 @@ pub mod pallet {
             sender: T::AccountId,
             sku: Sku,
             moved_by: MovedByAccount,
-            lot_number: u32,
+            lot_number: LotNumber,
+            serial_number: SerialNumber,
             abc_code: AbcCode,
             inventory_type: InventoryType,
             product_type: ProductType,
-            qty: u32,
-            weight: u32,
-            cycle_count: u32,
-            shelf_life: u32,
+            qty: Qty,
+            weight: Weight,
+            cycle_count: CycleCount,
+            shelf_life: ShelfLife,
         },
     }
 
@@ -81,19 +83,20 @@ pub mod pallet {
             origin: OriginFor<T>,
             sku: Sku,
             moved_by: MovedByAccount,
-            lot_number: u32,
+            lot_number: LotNumber,
+            serial_number: SerialNumber,
             abc_code: AbcCode,
             inventory_type: InventoryType,
             product_type: ProductType,
-            qty: u32,
-            weight: u32,
-            cycle_count: u32,
-            shelf_life: u32,
+            qty: Qty,
+            weight: Weight,
+            cycle_count: CycleCount,
+            shelf_life: ShelfLife,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
             // Request storage of the new item
-            Self::do_inventory_insertion(&who, &sku, &moved_by, lot_number, &abc_code, &inventory_type, &product_type, qty, weight, cycle_count, shelf_life)?;
+            Self::do_inventory_insertion(&who, &sku, &moved_by, &lot_number, &serial_number, &abc_code, &inventory_type, &product_type, &qty, &weight, &cycle_count, &shelf_life)?;
 
             // Emit an event detailing a new Item has been entered
             Self::deposit_event(Event::AddNewItem {
@@ -101,6 +104,7 @@ pub mod pallet {
                 sku,
                 moved_by,
                 lot_number,
+                serial_number,
                 abc_code,
                 inventory_type,
                 product_type,
