@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="CargoProjects">
+    <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b093e279-e153-4d6a-a875-ac432c02a00e" name="Changes" comment="Add getters for inventory" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Wolfenheimm&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Wolfenheimm/erp-blockchain.git&quot;,
+    &quot;accountId&quot;: &quot;8c51a406-1dfd-4ebb-9617-ae8ab945b7d6&quot;
+  }
+}</component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="we0a6m6s" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2kWIee2UT24xZ6OEoWxpdKH65dt" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.rust.reset.selective.auto.import": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/raithbheart/projects/erp-blockchain",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
+    "org.rust.first.attach.projects": "true",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Cargo.Test erp-blockchain">
+    <configuration name="Run minimal-template-node" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="command" value="run --package minimal-template-node --bin minimal-template-node" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test erp-blockchain" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+      <option name="command" value="test --workspace" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b093e279-e153-4d6a-a875-ac432c02a00e" name="Changes" comment="" />
+      <created>1723393002066</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1723393002066</updated>
+      <workItem from="1723393003103" duration="15581000" />
+      <workItem from="1723833304460" duration="28468000" />
+    </task>
+    <task id="LOCAL-00001" summary="Initial Commit &#10;&#10;This build currently has a pallet for inventory, with a working event that is triggered when an inventory entry occurs. Currently, the inventory entry accepts SKU, QTY, WEIGHT - But will later evolve to accept a wide array of information meant for storage. &#10;&#10;This proof-of-concept will evolve drastically over time; Discussions with manufacturing sector accountants, warehouse techs and salespeople are very much required.">
+      <option name="closed" value="true" />
+      <created>1723393712851</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1723393712851</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Began the preliminaries of the Item and Inventory structs for the Inventory Pallet">
+      <option name="closed" value="true" />
+      <created>1723843910704</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1723843910704</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Refactored Variables.">
+      <option name="closed" value="true" />
+      <created>1724042387966</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1724042387966</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Chore: Comment cleanup">
+      <option name="closed" value="true" />
+      <created>1724043001159</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1724043001159</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Add getters for inventory">
+      <option name="closed" value="true" />
+      <created>1724073529581</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1724073529581</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial Commit &#10;&#10;This build currently has a pallet for inventory, with a working event that is triggered when an inventory entry occurs. Currently, the inventory entry accepts SKU, QTY, WEIGHT - But will later evolve to accept a wide array of information meant for storage. &#10;&#10;This proof-of-concept will evolve drastically over time; Discussions with manufacturing sector accountants, warehouse techs and salespeople are very much required." />
+    <MESSAGE value="Began the preliminaries of the Item and Inventory structs for the Inventory Pallet" />
+    <MESSAGE value="Refactored Variables." />
+    <MESSAGE value="Chore: Comment cleanup" />
+    <MESSAGE value="Add getters for inventory" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add getters for inventory" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
