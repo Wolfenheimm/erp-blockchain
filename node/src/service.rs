@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use futures::FutureExt;
@@ -23,17 +24,61 @@ type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 /// imported and generated.
 const GRANDPA_JUSTIFICATION_PERIOD: u32 = 512;
 
+=======
+// This file is part of Substrate.
+
+// Copyright (C) Parity Technologies (UK) Ltd.
+// SPDX-License-Identifier: Apache-2.0
+
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use futures::FutureExt;
+use minimal_template_runtime::{interface::OpaqueBlock as Block, RuntimeApi};
+use sc_client_api::backend::Backend;
+use sc_executor::WasmExecutor;
+use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_telemetry::{Telemetry, TelemetryWorker};
+use sc_transaction_pool_api::OffchainTransactionPoolFactory;
+use sp_runtime::traits::Block as BlockT;
+use std::sync::Arc;
+
+use crate::cli::Consensus;
+
+type HostFunctions = sp_io::SubstrateHostFunctions;
+
+pub(crate) type FullClient =
+	sc_service::TFullClient<Block, RuntimeApi, WasmExecutor<HostFunctions>>;
+
+type FullBackend = sc_service::TFullBackend<Block>;
+type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
+
+/// Assembly of PartialComponents (enough to run chain ops subcommands)
+>>>>>>> main
 pub type Service = sc_service::PartialComponents<
 	FullClient,
 	FullBackend,
 	FullSelectChain,
 	sc_consensus::DefaultImportQueue<Block>,
 	sc_transaction_pool::FullPool<Block, FullClient>,
+<<<<<<< HEAD
 	(
 		sc_consensus_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
 		sc_consensus_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
 		Option<Telemetry>,
 	),
+=======
+	Option<Telemetry>,
+>>>>>>> main
 >;
 
 pub fn new_partial(config: &Configuration) -> Result<Service, ServiceError> {
@@ -48,7 +93,12 @@ pub fn new_partial(config: &Configuration) -> Result<Service, ServiceError> {
 		})
 		.transpose()?;
 
+<<<<<<< HEAD
 	let executor = sc_service::new_wasm_executor::<sp_io::SubstrateHostFunctions>(config);
+=======
+	let executor = sc_service::new_wasm_executor(config);
+
+>>>>>>> main
 	let (client, backend, keystore_container, task_manager) =
 		sc_service::new_full_parts::<Block, RuntimeApi, _>(
 			config,
@@ -72,6 +122,7 @@ pub fn new_partial(config: &Configuration) -> Result<Service, ServiceError> {
 		client.clone(),
 	);
 
+<<<<<<< HEAD
 	let (grandpa_block_import, grandpa_link) = sc_consensus_grandpa::block_import(
 		client.clone(),
 		GRANDPA_JUSTIFICATION_PERIOD,
@@ -110,6 +161,13 @@ pub fn new_partial(config: &Configuration) -> Result<Service, ServiceError> {
 			telemetry: telemetry.as_ref().map(|x| x.handle()),
 			compatibility_mode: Default::default(),
 		})?;
+=======
+	let import_queue = sc_consensus_manual_seal::import_queue(
+		Box::new(client.clone()),
+		&task_manager.spawn_essential_handle(),
+		config.prometheus_registry(),
+	);
+>>>>>>> main
 
 	Ok(sc_service::PartialComponents {
 		client,
@@ -119,15 +177,25 @@ pub fn new_partial(config: &Configuration) -> Result<Service, ServiceError> {
 		keystore_container,
 		select_chain,
 		transaction_pool,
+<<<<<<< HEAD
 		other: (grandpa_block_import, grandpa_link, telemetry),
+=======
+		other: (telemetry),
+>>>>>>> main
 	})
 }
 
 /// Builds a new service for a full client.
+<<<<<<< HEAD
 pub fn new_full<
 	N: sc_network::NetworkBackend<Block, <Block as sp_runtime::traits::Block>::Hash>,
 >(
 	config: Configuration,
+=======
+pub fn new_full<Network: sc_network::NetworkBackend<Block, <Block as BlockT>::Hash>>(
+	config: Configuration,
+	consensus: Consensus,
+>>>>>>> main
 ) -> Result<TaskManager, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -137,6 +205,7 @@ pub fn new_full<
 		keystore_container,
 		select_chain,
 		transaction_pool,
+<<<<<<< HEAD
 		other: (block_import, grandpa_link, mut telemetry),
 	} = new_partial(&config)?;
 
@@ -165,17 +234,41 @@ pub fn new_full<
 		grandpa_link.shared_authority_set().clone(),
 		Vec::default(),
 	));
+=======
+		other: mut telemetry,
+	} = new_partial(&config)?;
+
+	let net_config = sc_network::config::FullNetworkConfiguration::<
+		Block,
+		<Block as BlockT>::Hash,
+		Network,
+	>::new(
+		&config.network
+	);
+	let metrics = Network::register_notification_metrics(
+		config.prometheus_config.as_ref().map(|cfg| &cfg.registry),
+	);
+>>>>>>> main
 
 	let (network, system_rpc_tx, tx_handler_controller, network_starter, sync_service) =
 		sc_service::build_network(sc_service::BuildNetworkParams {
 			config: &config,
+<<<<<<< HEAD
 			net_config,
+=======
+>>>>>>> main
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
 			spawn_handle: task_manager.spawn_handle(),
 			import_queue,
+<<<<<<< HEAD
 			block_announce_validator_builder: None,
 			warp_sync_params: Some(WarpSyncParams::WithProvider(warp_sync)),
+=======
+			net_config,
+			block_announce_validator_builder: None,
+			warp_sync_params: None,
+>>>>>>> main
 			block_relay: None,
 			metrics,
 		})?;
@@ -201,6 +294,7 @@ pub fn new_full<
 		);
 	}
 
+<<<<<<< HEAD
 	let role = config.role.clone();
 	let force_authoring = config.force_authoring;
 	let backoff_authoring_blocks: Option<()> = None;
@@ -208,6 +302,8 @@ pub fn new_full<
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
 
+=======
+>>>>>>> main
 	let rpc_extensions_builder = {
 		let client = client.clone();
 		let pool = transaction_pool.clone();
@@ -219,8 +315,15 @@ pub fn new_full<
 		})
 	};
 
+<<<<<<< HEAD
 	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
 		network: Arc::new(network.clone()),
+=======
+	let prometheus_registry = config.prometheus_registry().cloned();
+
+	let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
+		network,
+>>>>>>> main
 		client: client.clone(),
 		keystore: keystore_container.keystore(),
 		task_manager: &mut task_manager,
@@ -229,11 +332,16 @@ pub fn new_full<
 		backend,
 		system_rpc_tx,
 		tx_handler_controller,
+<<<<<<< HEAD
 		sync_service: sync_service.clone(),
+=======
+		sync_service,
+>>>>>>> main
 		config,
 		telemetry: telemetry.as_mut(),
 	})?;
 
+<<<<<<< HEAD
 	if role.is_authority() {
 		let proposer_factory = sc_basic_authorship::ProposerFactory::new(
 			task_manager.spawn_handle(),
@@ -325,6 +433,73 @@ pub fn new_full<
 			None,
 			sc_consensus_grandpa::run_grandpa_voter(grandpa_config)?,
 		);
+=======
+	let proposer = sc_basic_authorship::ProposerFactory::new(
+		task_manager.spawn_handle(),
+		client.clone(),
+		transaction_pool.clone(),
+		prometheus_registry.as_ref(),
+		telemetry.as_ref().map(|x| x.handle()),
+	);
+
+	match consensus {
+		Consensus::InstantSeal => {
+			let params = sc_consensus_manual_seal::InstantSealParams {
+				block_import: client.clone(),
+				env: proposer,
+				client,
+				pool: transaction_pool,
+				select_chain,
+				consensus_data_provider: None,
+				create_inherent_data_providers: move |_, ()| async move {
+					Ok(sp_timestamp::InherentDataProvider::from_system_time())
+				},
+			};
+
+			let authorship_future = sc_consensus_manual_seal::run_instant_seal(params);
+
+			task_manager.spawn_essential_handle().spawn_blocking(
+				"instant-seal",
+				None,
+				authorship_future,
+			);
+		},
+		Consensus::ManualSeal(block_time) => {
+			let (mut sink, commands_stream) = futures::channel::mpsc::channel(1024);
+			task_manager.spawn_handle().spawn("block_authoring", None, async move {
+				loop {
+					futures_timer::Delay::new(std::time::Duration::from_millis(block_time)).await;
+					sink.try_send(sc_consensus_manual_seal::EngineCommand::SealNewBlock {
+						create_empty: true,
+						finalize: true,
+						parent_hash: None,
+						sender: None,
+					})
+					.unwrap();
+				}
+			});
+
+			let params = sc_consensus_manual_seal::ManualSealParams {
+				block_import: client.clone(),
+				env: proposer,
+				client,
+				pool: transaction_pool,
+				select_chain,
+				commands_stream: Box::pin(commands_stream),
+				consensus_data_provider: None,
+				create_inherent_data_providers: move |_, ()| async move {
+					Ok(sp_timestamp::InherentDataProvider::from_system_time())
+				},
+			};
+			let authorship_future = sc_consensus_manual_seal::run_manual_seal(params);
+
+			task_manager.spawn_essential_handle().spawn_blocking(
+				"manual-seal",
+				None,
+				authorship_future,
+			);
+		},
+>>>>>>> main
 	}
 
 	network_starter.start_network();

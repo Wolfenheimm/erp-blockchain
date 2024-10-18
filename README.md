@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Substrate Node Template
 
 A fresh [Substrate](https://substrate.io/) node, ready for hacking :rocket:
@@ -222,3 +223,9 @@ the correct dependencies, activate direnv `direnv allow`.
 Please follow the [Substrate Docker instructions
 here](https://github.com/paritytech/polkadot-sdk/blob/master/substrate/docker/README.md) to
 build the Docker container with the Substrate Node Template binary.
+=======
+# ERP-Blockchain [WIP]
+A blockchain to simulate a portion of an ERP system, specifically targeting Inventory, Sales, Receiving, Shipping.
+
+This PoC's foundation is built on [Polkadot SDK's Minimal Template](https://github.com/paritytech/polkadot-sdk-minimal-template).
+>>>>>>> main
