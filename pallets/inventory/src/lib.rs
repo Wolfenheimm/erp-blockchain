@@ -6,18 +6,18 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-mod core;
+mod blogic;
 mod types;
 
 pub use pallet::*;
 
 #[frame::pallet(dev_mode)]
 pub mod pallet {
-    pub use crate::types::{Item, Lot, AbcCode, InventoryType, ProductType, Sku, MovedByAccount};
+    pub use crate::types::{AbcCode, InventoryType, Item, Lot, MovedByAccount, ProductType, Sku};
+    use crate::types::{CycleCount, LotNumber, Qty, SerialNumber, ShelfLife, Weight};
     use frame::prelude::*;
     use pallet_timestamp::{self as timestamp};
     use sp_std::vec::Vec;
-    use crate::types::{CycleCount, LotNumber, Qty, SerialNumber, ShelfLife, Weight};
 
     #[pallet::config]
     pub trait Config: frame_system::Config + timestamp::Config {
@@ -63,7 +63,6 @@ pub mod pallet {
         OptionQuery,
     >;
 
-
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         pub fn inventory_insertion(
@@ -82,7 +81,20 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            Self::do_inventory_insertion(&who, &sku, &moved_by, &lot_number, &serial_number, &abc_code, &inventory_type, &product_type, &qty, &weight, &cycle_count, &shelf_life)?;
+            Self::do_inventory_insertion(
+                &who,
+                &sku,
+                &moved_by,
+                &lot_number,
+                &serial_number,
+                &abc_code,
+                &inventory_type,
+                &product_type,
+                &qty,
+                &weight,
+                &cycle_count,
+                &shelf_life,
+            )?;
 
             Self::deposit_event(Event::AddNewItem {
                 sender: who,
