@@ -5,7 +5,6 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 extern crate alloc;
 use alloc::{vec, vec::Vec};
-use frame_support::BoundedVec;
 use pallet_grandpa::AuthorityId as GrandpaId;
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -48,7 +47,7 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
 /// Import the template pallet.
-pub use pallet_template;
+pub use pallet_inventory;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -93,12 +92,65 @@ pub mod opaque {
     }
 }
 
+pub const PROD_RUNTIME_PRESET: &'static str = "production";
+
+/// Provides getters for genesis configuration presets.
+pub mod genesis_config_presets {
+    use crate::{
+        interface::{Balance, MinimumBalance},
+        BalancesConfig, RuntimeGenesisConfig, SudoConfig, PROD_RUNTIME_PRESET,
+    };
+
+    use frame_support::traits::Get;
+    use sp_genesis_builder::PresetId;
+    use sp_keyring::AccountKeyring;
+
+    use alloc::{vec, vec::Vec};
+    use serde_json::Value;
+
+    /// Returns a development genesis config preset.
+    pub fn production_config_genesis() -> Value {
+        let endowment = <MinimumBalance as Get<Balance>>::get().max(1) * 1000;
+        let config = RuntimeGenesisConfig {
+            balances: BalancesConfig {
+                balances: AccountKeyring::iter()
+                    .map(|a| (a.to_account_id(), endowment))
+                    .collect::<Vec<_>>(),
+            },
+            sudo: SudoConfig {
+                key: Some(AccountKeyring::Alice.to_account_id()),
+            },
+            ..Default::default()
+        };
+
+        serde_json::to_value(config).expect("Could not build genesis config.")
+    }
+
+    /// Get the set of the available genesis config presets.
+    pub fn get_preset(id: &PresetId) -> Option<Vec<u8>> {
+        let patch = match id.try_into() {
+            Ok(PROD_RUNTIME_PRESET) => production_config_genesis(),
+            _ => return None,
+        };
+        Some(
+            serde_json::to_string(&patch)
+                .expect("serialization to json is expected to work. qed.")
+                .into_bytes(),
+        )
+    }
+
+    /// List of supported presets.
+    pub fn preset_names() -> Vec<PresetId> {
+        vec![PresetId::from(PROD_RUNTIME_PRESET)]
+    }
+}
+
 // To learn more about runtime versioning, see:
 // https://docs.substrate.io/main-docs/build/upgrade#runtime-versioning
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("solochain-template-runtime"),
-    impl_name: create_runtime_str!("solochain-template-runtime"),
+    spec_name: create_runtime_str!("erp-blockchain-runtime"),
+    impl_name: create_runtime_str!("erp-blockchain-runtime"),
     authoring_version: 1,
     // The version of the runtime specification. A full node will not attempt to use its native
     //   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
@@ -253,9 +305,9 @@ impl pallet_sudo::Config for Runtime {
 }
 
 /// Configure the pallet-template in pallets/template.
-impl pallet_template::Config for Runtime {
+impl pallet_inventory::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
+    type WeightInfo = pallet_inventory::weights::SubstrateWeight<Runtime>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -298,7 +350,7 @@ mod runtime {
 
     // Include the custom logic from the pallet-template in the runtime.
     #[runtime::pallet_index(7)]
-    pub type TemplateModule = pallet_template;
+    pub type Inventory = pallet_inventory;
 }
 
 /// The address format for describing accounts.
@@ -348,7 +400,7 @@ mod benches {
         [pallet_balances, Balances]
         [pallet_timestamp, Timestamp]
         [pallet_sudo, Sudo]
-        [pallet_template, TemplateModule]
+        [pallet_inventory, Inventory]
     );
 }
 
@@ -589,11 +641,29 @@ impl_runtime_apis! {
         }
 
         fn get_preset(id: &Option<sp_genesis_builder::PresetId>) -> Option<Vec<u8>> {
-            get_preset::<RuntimeGenesisConfig>(id, |_| None)
+            get_preset::<RuntimeGenesisConfig>(id, crate::genesis_config_presets::get_preset)
         }
 
         fn preset_names() -> Vec<sp_genesis_builder::PresetId> {
-            vec![]
+            crate::genesis_config_presets::preset_names()
         }
     }
+}
+
+/// Some re-exports that the node side code needs to know. Some are useful in this context as well.
+///
+/// Other types should preferably be private.
+// TODO: this should be standardized in some way, see:
+// https://github.com/paritytech/substrate/issues/10579#issuecomment-1600537558
+pub mod interface {
+    use super::Runtime;
+    use frame_system;
+
+    pub type Block = super::Block;
+    pub use frame_support::sp_runtime::OpaqueExtrinsic as OpaqueBlock;
+    pub type AccountId = <Runtime as frame_system::Config>::AccountId;
+    pub type Nonce = <Runtime as frame_system::Config>::Nonce;
+    pub type Hash = <Runtime as frame_system::Config>::Hash;
+    pub type Balance = <Runtime as pallet_balances::Config>::Balance;
+    pub type MinimumBalance = <Runtime as pallet_balances::Config>::ExistentialDeposit;
 }

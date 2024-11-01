@@ -110,3 +110,11 @@ Before using this pallet, ensure that your runtime includes the following depend
 
 - **pallet_timestamp**: To manage timestamps for inventory items (e.g., for shelf life).
 - **frame_system**: Core system pallet for handling account and event storage.
+
+frame-omni-bencher v1 benchmark pallet \
+ --runtime target/production/wbuild/erp-blockchain-runtime/erp_blockchain_runtime.compact.compressed.wasm \
+ --pallet "pallet-inventory" \
+ --extrinsic "\*" \
+ --genesis-builder-preset=production \
+ --output ./pallets/inventory/src/weights.rs \
+ --template .maintain/frame-weight-template.hbs

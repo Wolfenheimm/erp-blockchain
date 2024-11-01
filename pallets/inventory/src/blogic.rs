@@ -1,10 +1,10 @@
+use crate::Config;
+use crate::Error;
+use crate::Inventory;
+use crate::{pallet::Pallet, types::*};
 use codec::{Encode, MaxEncodedLen};
-use crate::{pallet::Pallet, Item, Sku, InventoryType, ProductType, AbcCode, Config, Value, Error};
-use sp_runtime::DispatchResult;
-use pallet_timestamp::{self as timestamp};
-use crate::types::{Lot, CycleCount, LotNumber, MovedByAccount, Qty, SerialNumber, ShelfLife, Weight};
-use scale_info::prelude::vec;
-
+use frame_support::sp_runtime::DispatchResult;
+use frame_support::BoundedVec;
 
 impl<T: Config> Pallet<T> {
     pub fn do_inventory_insertion(
@@ -17,11 +17,11 @@ impl<T: Config> Pallet<T> {
         inventory_type: &InventoryType,
         product_type: &ProductType,
         qty: &Qty,
-        weight: &Weight,
+        weight_lbs: &WeightLbs,
         cycle_count: &CycleCount,
         shelf_life: &ShelfLife,
     ) -> DispatchResult {
-        let item: Item<T> = Item {
+        let item: Item = Item {
             moved_by: moved_by.clone(),
             sku: sku.clone(),
             lot_number: lot_number.clone(),
@@ -30,14 +30,10 @@ impl<T: Config> Pallet<T> {
             inventory_type: inventory_type.clone(),
             product_type: product_type.clone(),
             qty: qty.clone(),
-            weight: weight.clone(),
+            weight: weight_lbs.clone(),
             cycle_count: cycle_count.clone(),
             shelf_life: shelf_life.clone(),
-            created_at: <timestamp::Pallet<T>>::get(),
-        };
-
-        let lot = Lot {
-            lot_number: lot_number.clone(),
+            created_at: 1,
         };
 
         // Ensure SKU length does not exceed 16
@@ -48,26 +44,16 @@ impl<T: Config> Pallet<T> {
             return Err(Error::<T>::InvalidSkuLength.into());
         }
 
-        let mut items = <Value<T>>::get((who, sku)).unwrap_or_default();
+        // Fetch the existing inventory for the (who, sku) combination
+        let mut items = <Inventory<T>>::get((who, sku)).unwrap_or_else(|| BoundedVec::new());
 
-        // Check if there's an existing lot with the given lot_number
-        let mut found_lot = false;
+        // Try to push the new item to the vector
+        items
+            .try_push(item)
+            .map_err(|_| Error::<T>::StorageOverflow)?;
 
-        // Iterate through items to find the lot and update it
-        for (existing_lot, ref mut existing_items) in items.iter_mut() {
-            if &existing_lot.lot_number == lot_number {
-                existing_items.push(item.clone());
-                found_lot = true;
-                break;
-            }
-        }
-
-        if !found_lot {
-            // If no existing lot found, create a new lot and add the item
-            items.push((Lot { lot_number: lot_number.clone() }, vec![item]));
-        }
-
-        <Value<T>>::insert((who, sku), items);
+        // Insert the updated vector back into storage
+        <Inventory<T>>::insert((who, sku), items);
 
         Ok(())
     }

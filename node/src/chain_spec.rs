@@ -1,5 +1,5 @@
+use erp_blockchain_runtime::{AccountId, Signature, WASM_BINARY};
 use sc_service::ChainType;
-use solochain_template_runtime::{AccountId, Signature, WASM_BINARY};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
@@ -10,6 +10,8 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec;
+
+pub const PROD_RUNTIME_PRESET: &'static str = "production";
 
 /// Generate a crypto pair from seed.
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -55,6 +57,36 @@ pub fn development_config() -> Result<ChainSpec, String> {
         ],
         true,
     ))
+    .build())
+}
+
+pub fn production_config() -> Result<ChainSpec, String> {
+    Ok(ChainSpec::builder(
+        WASM_BINARY.expect("Production wasm not available"),
+        Default::default(),
+    )
+    .with_name("Production")
+    .with_id("production")
+    .with_chain_type(ChainType::Development)
+    .with_genesis_config_patch(testnet_genesis(
+        // Initial PoA authorities
+        vec![authority_keys_from_seed("Alice")],
+        // Sudo account
+        get_account_id_from_seed::<sr25519::Public>("Alice"),
+        // Pre-funded accounts
+        vec![
+            get_account_id_from_seed::<sr25519::Public>("Alice"),
+            get_account_id_from_seed::<sr25519::Public>("Bob"),
+            get_account_id_from_seed::<sr25519::Public>("Dave"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie"),
+            get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+            get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+        ],
+        true,
+    ))
+    .with_genesis_config_preset_name(PROD_RUNTIME_PRESET)
     .build())
 }
 
