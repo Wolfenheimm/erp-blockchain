@@ -15,6 +15,7 @@ pub type WeightLbs = u32;
 pub type PurchaseDate = u32;
 pub type Qty = u32;
 pub type Sku = BoundedVec<u8, ConstU32<16>>;
+pub type ScrapReason = BoundedVec<u8, ConstU32<128>>;
 
 #[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo, Default, MaxEncodedLen)]
 pub enum AbcCode {
@@ -81,4 +82,12 @@ pub struct Item {
 #[scale_info(skip_type_params(T))]
 pub struct Lot {
     pub lot_number: LotNumber,
+}
+
+#[derive(Encode, Decode, MaxEncodedLen, TypeInfo, Clone, PartialEq, Eq, Debug)]
+pub struct ScrapDetails {
+    pub issuer: MovedByAccount,
+    pub mats: BoundedVec<Item, ConstU32<100>>,
+    pub reason: ScrapReason,
+    pub equipment: BoundedVec<u8, ConstU32<32>>,
 }

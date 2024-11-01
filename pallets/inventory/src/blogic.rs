@@ -1,7 +1,7 @@
 use crate::Config;
 use crate::Error;
-use crate::Inventory;
 use crate::{pallet::Pallet, types::*};
+use crate::{Inventory, ScrapInventory};
 use codec::{Encode, MaxEncodedLen};
 use frame_support::sp_runtime::DispatchResult;
 use frame_support::BoundedVec;
@@ -54,6 +54,35 @@ impl<T: Config> Pallet<T> {
 
         // Insert the updated vector back into storage
         <Inventory<T>>::insert((who, sku), items);
+
+        Ok(())
+    }
+
+    pub fn do_inventory_scrap(
+        who: &T::AccountId,
+        sku: &Sku,
+        moved_by: &MovedByAccount,
+        reason: &ScrapReason,
+    ) -> DispatchResult {
+        // Fetch the existing inventory for the (who, sku) combination
+        let items = <Inventory<T>>::get((who, sku));
+
+        // Ensure the inventory exists
+        let items = items.ok_or(Error::<T>::InventoryNotFound)?;
+
+        let scrap_details = ScrapDetails {
+            issuer: moved_by.clone(),
+            mats: items.clone(),
+            reason: reason.clone(),
+            equipment: BoundedVec::try_from("Equipment-U1322-1".as_bytes().to_vec())
+                .expect("Failed to create BoundedVec"),
+        };
+
+        // Scrap the item by sending it to the ScrapInventory storage
+        <ScrapInventory<T>>::insert((who, sku), scrap_details);
+
+        // Remove the item from the Inventory storage
+        <Inventory<T>>::remove((who, sku));
 
         Ok(())
     }

@@ -120,6 +120,12 @@ pub mod pallet {
             cycle_count: CycleCount,
             shelf_life: ShelfLife,
         },
+        ItemScrapped {
+            sender: T::AccountId,
+            sku: Sku,
+            moved_by: MovedByAccount,
+            reason: ScrapReason,
+        },
     }
 
     #[pallet::storage]
@@ -130,6 +136,17 @@ pub mod pallet {
             NMapKey<Blake2_128Concat, Sku>,
         ),
         BoundedVec<Item, ConstU32<100>>,
+        OptionQuery,
+    >;
+
+    #[pallet::storage]
+    pub type ScrapInventory<T: Config> = StorageNMap<
+        _,
+        (
+            NMapKey<Blake2_128Concat, T::AccountId>,
+            NMapKey<Blake2_128Concat, Sku>,
+        ),
+        ScrapDetails,
         OptionQuery,
     >;
 
@@ -149,6 +166,7 @@ pub mod pallet {
         StorageOverflow,
         ConversionFailed,
         InvalidSkuLength,
+        InventoryNotFound,
     }
 
     /// The pallet's dispatchable functions ([`Call`]s).
@@ -165,6 +183,7 @@ pub mod pallet {
     /// The [`weight`] macro is used to assign a weight to each call.
     #[pallet::call]
     impl<T: Config> Pallet<T> {
+        /// Insert inventory item into storage
         #[pallet::call_index(0)]
         #[pallet::weight(T::WeightInfo::inventory_insertion())]
         pub fn inventory_insertion(
@@ -212,6 +231,29 @@ pub mod pallet {
                 weight_lbs,
                 cycle_count,
                 shelf_life,
+            });
+
+            Ok(())
+        }
+
+        #[pallet::call_index(1)]
+        #[pallet::weight(T::WeightInfo::inventory_insertion())]
+        pub fn inventory_scrap(
+            origin: OriginFor<T>,
+            sku: Sku,
+            moved_by: MovedByAccount,
+            reason: ScrapReason,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+
+            Self::do_inventory_scrap(&who, &sku, &moved_by, &reason)?;
+
+            // Emit an event.
+            Self::deposit_event(Event::ItemScrapped {
+                sender: who,
+                sku,
+                moved_by,
+                reason,
             });
 
             Ok(())
