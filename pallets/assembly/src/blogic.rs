@@ -31,6 +31,7 @@ impl<T: Config> Pallet<T> {
         };
 
         // Query the inventory locale area to get the BOM (this is assumed to be true because the staging area is prepped)
+        // TODO: Never assume you will get what is needed. Always check if the staging area is prepped.
         let mut staging_inventory =
             InventoryLocale::<T>::get(staging_location).ok_or(Error::<T>::StagingAreaNotFound)?;
 
@@ -57,24 +58,43 @@ impl<T: Config> Pallet<T> {
                         Error::<T>::InsufficientInventory
                     );
 
+                    let mut bom_item = item.clone();
+
                     // Adjust the quantity of the item according to consumption
                     if item.qty >= recipe_quantity {
+                        // Remove the consumed quantity from the staging area
                         item.qty -= recipe_quantity;
                         required_quantity -= recipe_quantity;
+                        // Add the consumed quantity to the BOM
+                        bom_item.qty = recipe_quantity;
+                        bom.materials
+                            .try_push(bom_item)
+                            .map_err(|_| Error::<T>::BomConstructIssue)?;
+                    // There is not enough quantity in the staging area to fulfill the recipe requirement
                     } else if item.qty < recipe_quantity {
+                        // There is enough quantity in the staging area to fulfill the leftover requirement
                         if item.qty > required_quantity {
+                            // Remove the consumed quantity from the staging area
                             item.qty -= required_quantity;
+                            // Add the consumed quantity to the BOM
+                            bom_item.qty = required_quantity;
+                            bom.materials
+                                .try_push(bom_item)
+                                .map_err(|_| Error::<T>::BomConstructIssue)?;
+                            // Set the required quantity to 0, it has been consumed
                             required_quantity = 0;
+                        // There is not enough quantity in the staging area to fulfill the leftover requirement
                         } else {
+                            // Add the consumed quantity to the BOM
+                            bom.materials
+                                .try_push(bom_item)
+                                .map_err(|_| Error::<T>::BomConstructIssue)?;
+                            // Update the required quantity
                             required_quantity -= item.qty;
+                            // Set the item quantity to 0, it has been consumed
                             item.qty = 0;
                         }
                     }
-
-                    // Attempt to push the component into the BoundedVec
-                    bom.materials
-                        .try_push(item.clone())
-                        .map_err(|_| Error::<T>::BomConstructIssue)?;
 
                     log::info!("Staging Item Consumed: {:?}", item.clone());
 
@@ -197,6 +217,7 @@ impl<T: Config> Pallet<T> {
         }
 
         // Insert the BOM into the staging area
+        // TODO: This is not well defined, we need to find a better way to store the staging area bom
         StagingArea::<T>::insert(
             work_order.clone(),
             work_order.recipe.required_equipment.clone(),
