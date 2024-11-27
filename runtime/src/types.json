@@ -1,0 +1,36 @@
+{
+  "runtime_id": {
+    "types": {
+      "Sku": "BoundedVec<u8, ConstU32<16>>",
+      "AbcCode": {
+        "_enum": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      "MovedByAccount": {
+        "_enum": [
+          "Bob",
+          "Charlie",
+          "Dave"
+        ]
+      },
+      "Item": {
+        "type": "struct",
+        "type_def": {
+          "moved_by": "MovedByAccount",
+          "lot_number": "u32",
+          "abc_code": "AbcCode",
+          "inventory_type": "u32",
+          "product_type": "u32",
+          "qty": "u32",
+          "weight": "u32",
+          "shelf_life": "u32",
+          "cycle_count": "u32",
+          "created_at": "Moment"
+        }
+      }
+    }
+  }
+}
