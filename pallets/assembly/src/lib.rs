@@ -17,7 +17,6 @@ pub mod pallet {
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use pallet_inventory::pallet::Config as InventoryConfig;
-    use pallet_inventory::types::{Equipment, Recipe};
 
     #[pallet::pallet]
     pub struct Pallet<T>(_);
@@ -38,17 +37,6 @@ pub mod pallet {
         ),
         (Item, Bom),
         OptionQuery,
-    >;
-
-    #[pallet::storage]
-    pub type StagingArea<T: Config> = StorageDoubleMap<
-        _,
-        Twox64Concat,
-        WorkOrder, // First key: Work order
-        Twox64Concat,
-        Equipment,     // Second key: Equipment
-        (Bom, Recipe), // Value: Bom
-        OptionQuery,   // Query type
     >;
 
     #[pallet::storage]
@@ -79,17 +67,23 @@ pub mod pallet {
         InsufficientComponents,
         /// Assembly process failed
         AssemblyFailed,
-        ExceededMaxComponents,
+        /// Not enough inventory to set up staging or assemble the product
         InsufficientInventory,
+        /// The description length exceeds the maximum imposed limit
         DescriptionTooLong,
+        /// Unable to find the defined work order
         WorkOrderNotFound,
+        /// Unable to find the defined staging area
         StagingAreaNotFound,
+        /// The BOM was improperly built
         BomConstructIssue,
+        /// The work order already exists
+        WorkOrderAlreadyExists,
     }
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
-        /// Assemble a product from components in inventory
+        /// Assemble a product from components in staging
         #[pallet::call_index(0)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn assemble_product(
@@ -100,9 +94,7 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
-            Self::do_assemble_product(&who, work_order.clone(), serial_number, staging_location)?; // Recipe qty to be sent here instead
-                                                                                                   // TODO: Think about what happens if the output quantity is less than the defined recipe quantity
-                                                                                                   // -- It can be acceptable to have a worker manually adjust the item quantity after assembly, in case something went wrong.
+            Self::do_assemble_product(&who, work_order.clone(), serial_number, staging_location)?;
 
             // Emit the assembled product
             Self::deposit_event(Event::ProductAssembled {
@@ -115,6 +107,8 @@ pub mod pallet {
 
         #[pallet::call_index(1)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+        /// Prepare the staging area for assembly
+        /// TODO: Later, add location to define different staging areas
         pub fn prepare_staging_area(origin: OriginFor<T>, work_order: WorkOrder) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
@@ -125,6 +119,7 @@ pub mod pallet {
 
         #[pallet::call_index(2)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+        /// Create a new work order
         pub fn create_work_order(origin: OriginFor<T>, work_order: WorkOrder) -> DispatchResult {
             let who = ensure_signed(origin)?;
 

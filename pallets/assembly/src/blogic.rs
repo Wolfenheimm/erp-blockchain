@@ -1,4 +1,4 @@
-use crate::pallet::{AssembledProducts, Config, Error, StagingArea, WorkOrders};
+use crate::pallet::{AssembledProducts, Config, Error, WorkOrders};
 use crate::{pallet::Pallet, types::*, Event};
 use frame_support::ensure;
 use frame_support::sp_runtime::DispatchResult;
@@ -10,7 +10,7 @@ use scale_info::prelude::vec::Vec;
 impl<T: Config> Pallet<T> {
     /// Assemble a product from a given Work Order
     ///
-    /// Must provide the serial number of the assembled product as well as the staging location
+    /// Must provide the serial number of the assembled product as well as the staging location.
     pub fn do_assemble_product(
         who: &T::AccountId,
         work_order: WorkOrder,
@@ -131,9 +131,6 @@ impl<T: Config> Pallet<T> {
             }
         }
 
-        // Clear the staging area
-        StagingArea::<T>::remove(&work_order, work_order.recipe.required_equipment.clone());
-
         // Insert the assembled product into storage
         AssembledProducts::<T>::insert(
             (who, work_order.recipe.sku.clone(), serial_number.clone()),
@@ -211,27 +208,25 @@ impl<T: Config> Pallet<T> {
                     .try_push(item.clone())
                     .map_err(|_| Error::<T>::BomConstructIssue)?;
             }
-
-            // Emit staging has been prepped
-            Self::deposit_event(Event::PrepStaging {
-                assembler: who.clone(),
-                work_order: work_order.clone(),
-            });
         }
 
-        // Insert the BOM into the staging area
-        // TODO: This is not well defined, we need to find a better way to store the staging area bom
-        StagingArea::<T>::insert(
-            work_order.clone(),
-            work_order.recipe.required_equipment.clone(),
-            (bom.clone(), work_order.recipe),
-        );
+        // Emit staging has been prepped
+        Self::deposit_event(Event::PrepStaging {
+            assembler: who.clone(),
+            work_order: work_order.clone(),
+        });
 
         Ok(())
     }
 
     pub fn do_create_work_order(work_order: WorkOrder) -> DispatchResult {
-        // TODO: check if the work order already exists
+        // Check if the work order already exists
+        let work_order_check = WorkOrders::<T>::get(work_order.work_order_number);
+
+        // If the work order already exists, return an error
+        if work_order_check.is_some() {
+            return Err(Error::<T>::WorkOrderAlreadyExists.into());
+        }
 
         // Insert the work order into storage
         <WorkOrders<T>>::insert(work_order.work_order_number, work_order);
