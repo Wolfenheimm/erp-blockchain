@@ -175,34 +175,37 @@ impl<T: Config> Pallet<T> {
             // Take the required items from inventory, place them into the staging area
             let mut qty = component.qty;
             for item in items.iter_mut() {
+                // Skip items with 0 quantity
                 if item.qty == 0 {
                     continue;
                 }
 
+                // Required quantity has been met
                 if qty <= 0 {
                     break;
                 }
 
-                let adjust_details = AdjustDetails::Location {
-                    original_location: item.location.clone(),
-                    new_location: Location::Staging,
-                    reason: BoundedVec::try_from("Prepare Staging Area".as_bytes().to_vec())
-                        .map_err(|_| Error::<T>::DescriptionTooLong)?,
-                };
-
+                // Keep track of the required quantity
                 if item.qty > qty {
                     qty = 0;
                 } else {
                     qty -= item.qty;
                 }
 
+                // Move to staging
                 let _ = pallet_inventory::Pallet::<T>::do_inventory_move(
                     who,
                     item.clone(),
                     item.moved_by.clone(),
-                    adjust_details,
+                    AdjustDetails::Location {
+                        original_location: item.location.clone(),
+                        new_location: Location::Staging,
+                        reason: BoundedVec::try_from("Prepare Staging Area".as_bytes().to_vec())
+                            .map_err(|_| Error::<T>::DescriptionTooLong)?,
+                    },
                 );
 
+                // Add the item to the BOM
                 let _ = bom
                     .materials
                     .try_push(item.clone())
