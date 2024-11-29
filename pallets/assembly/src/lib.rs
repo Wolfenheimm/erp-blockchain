@@ -21,12 +21,18 @@ pub mod pallet {
     #[pallet::pallet]
     pub struct Pallet<T>(_);
 
+    /// The pallet's configuration trait.
+    ///
+    /// This trait is tightly coupled with the Inventory pallet -> [InventoryConfig]
     #[pallet::config]
     pub trait Config: frame_system::Config + InventoryConfig {
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
         type WeightInfo: WeightInfo;
     }
 
+    /// Assembled Products Storage
+    ///
+    /// All Items that have been assembled
     #[pallet::storage]
     pub type AssembledProducts<T: Config> = StorageNMap<
         _,
@@ -39,10 +45,14 @@ pub mod pallet {
         OptionQuery,
     >;
 
+    /// Work Order Storage
+    ///
+    /// Work orders that are in progress or have not yet been completed
     #[pallet::storage]
     pub type WorkOrders<T: Config> =
         StorageMap<_, Twox64Concat, WorkOrderNumber, WorkOrder, OptionQuery>;
 
+    /// Events that functions in this pallet can emit.
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
@@ -61,6 +71,10 @@ pub mod pallet {
         },
     }
 
+    /// Errors that can be returned by this pallet.
+    ///
+    /// This type of runtime error can be up to 4 bytes in size should you want to return additional
+    /// information.
     #[pallet::error]
     pub enum Error<T> {
         /// Not enough components for assembly
@@ -81,6 +95,7 @@ pub mod pallet {
         WorkOrderAlreadyExists,
     }
 
+    /// The pallet's dispatchable functions
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Assemble a product from components in staging

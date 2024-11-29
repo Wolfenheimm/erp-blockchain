@@ -31,7 +31,8 @@ impl<T: Config> Pallet<T> {
         };
 
         // Query the inventory locale area to get the BOM (this is assumed to be true because the staging area is prepped)
-        // TODO: Never assume you will get what is needed. Always check if the staging area is prepped.
+        // TODO: Never assume you will get what is needed. Always check if the staging area is prepped - OR add a check on the prep
+        // at the end of the function to ensure the staging area is prepped...
         let mut staging_inventory =
             InventoryLocale::<T>::get(staging_location).ok_or(Error::<T>::StagingAreaNotFound)?;
 
@@ -144,7 +145,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
-    /// Prepare the staging area for a given Work Order
+    /// Prepare the staging area for a given Work Order.
     pub fn do_prepare_staging_area(who: &T::AccountId, work_order: WorkOrder) -> DispatchResult {
         // Check if the work order exists
         let work_order = WorkOrders::<T>::get(work_order.work_order_number)
@@ -219,6 +220,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Create a new work order, if it doesn't already exist.
     pub fn do_create_work_order(work_order: WorkOrder) -> DispatchResult {
         // Check if the work order already exists
         let work_order_check = WorkOrders::<T>::get(work_order.work_order_number);

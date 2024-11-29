@@ -93,15 +93,6 @@ pub mod pallet {
     }
 
     /// Events that functions in this pallet can emit.
-    ///
-    /// Events are a simple means of indicating to the outside world (such as dApps, chain explorers
-    /// or other users) that some notable update in the runtime has occurred. In a FRAME pallet, the
-    /// documentation for each event field and its parameters is added to a node's metadata so it
-    /// can be used by external interfaces or tools.
-    ///
-    ///	The `generate_deposit` macro generates a function on `Pallet` called `deposit_event` which
-    /// will convert the event type of your pallet into `RuntimeEvent` (declared in the pallet's
-    /// [`Config`] trait) and deposit it using [`frame_system::Pallet::deposit_event`].
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
@@ -147,11 +138,13 @@ pub mod pallet {
     }
 
     /// Global Inventory Storage
+    ///
     /// This storage is used to store the total quantity of each SKU in the inventory.
     #[pallet::storage]
     pub type GlobalInventory<T: Config> = StorageMap<_, Twox64Concat, Sku, Qty>;
 
     /// Inventory Storage
+    ///
     /// This storage is used to store items in the inventory.
     #[pallet::storage]
     pub type Inventory<T: Config> = StorageNMap<
@@ -166,6 +159,7 @@ pub mod pallet {
     >;
 
     /// Scrap Inventory Storage
+    ///
     /// This storage is used to store items that are defective, damaged, or otherwise unusable.
     /// The items in this storage are not part of the main inventory and are not counted as part of the stock.
     #[pallet::storage]
@@ -181,6 +175,7 @@ pub mod pallet {
     >;
 
     /// Adjust Inventory Storage
+    ///
     /// This storage is used to store qty adjustments made to items in the inventory.
     #[pallet::storage]
     pub type AdjustInventory<T: Config> = StorageNMap<
@@ -195,6 +190,7 @@ pub mod pallet {
     >;
 
     /// Recipes Storage
+    ///
     /// This storage is used to store the recipes for assembling products.
     #[pallet::storage]
     pub type Recipes<T: Config> = StorageMap<_, Twox64Concat, Sku, Recipe>;
@@ -207,10 +203,6 @@ pub mod pallet {
         StorageMap<_, Twox64Concat, Location, BoundedBTreeMap<SerialNumber, Item, ConstU32<1000>>>;
 
     /// Errors that can be returned by this pallet.
-    ///
-    /// Errors tell users that something went wrong so it's important that their naming is
-    /// informative. Similar to events, error documentation is added to a node's metadata so it's
-    /// equally important that they have helpful documentation associated with them.
     ///
     /// This type of runtime error can be up to 4 bytes in size should you want to return additional
     /// information.
@@ -238,18 +230,7 @@ pub mod pallet {
         MaterialNotFound,
     }
 
-    /// The pallet's dispatchable functions ([`Call`]s).
-    ///
-    /// Dispatchable functions allows users to interact with the pallet and invoke state changes.
-    /// These functions materialize as "extrinsics", which are often compared to transactions.
-    /// They must always return a `DispatchResult` and be annotated with a weight and call index.
-    ///
-    /// The [`call_index`] macro is used to explicitly
-    /// define an index for calls in the [`Call`] enum. This is useful for pallets that may
-    /// introduce new dispatchables over time. If the order of a dispatchable changes, its index
-    /// will also change which will break backwards compatibility.
-    ///
-    /// The [`weight`] macro is used to assign a weight to each call.
+    /// The pallet's dispatchable functions
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Insert inventory item into storage
@@ -264,6 +245,7 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Scrap an item from inventory
         #[pallet::call_index(1)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn inventory_scrap(
@@ -288,6 +270,7 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Move an item in inventory
         #[pallet::call_index(2)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn inventory_move(
@@ -317,6 +300,7 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Adjust an item's qty in inventory
         #[pallet::call_index(3)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn inventory_adjust(
@@ -338,6 +322,7 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Insert a recipe into storage
         #[pallet::call_index(4)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn insert_recipe(origin: OriginFor<T>, recipe: Recipe) -> DispatchResult {
@@ -355,6 +340,7 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Insert a material into storage
         #[pallet::call_index(5)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn insert_material(origin: OriginFor<T>, material: Material) -> DispatchResult {
@@ -371,6 +357,7 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Delete a material from storage
         #[pallet::call_index(6)]
         #[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
         pub fn delete_material(origin: OriginFor<T>, sku: Sku) -> DispatchResult {
@@ -384,6 +371,7 @@ pub mod pallet {
             Ok(())
         }
 
+        /// Update a material in storage
         #[pallet::call_index(7)]
         #[pallet::weight(T::WeightInfo::inventory_insertion())]
         pub fn update_material(origin: OriginFor<T>, material: Material) -> DispatchResult {

@@ -9,6 +9,7 @@ use frame_support::sp_runtime::DispatchResult;
 use frame_support::BoundedBTreeMap;
 
 impl<T: Config> Pallet<T> {
+    /// Insert a new item into inventory
     pub fn do_inventory_insertion(who: &T::AccountId, item: Item) -> DispatchResult {
         // Ensure SKU length does not exceed 16
         let sku_encoded_len = item.sku.encode().len();
@@ -65,6 +66,9 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Scrap an item from inventory
+    ///
+    /// Removes the item from the inventory and moves it to the scrap inventory
     pub fn do_inventory_scrap(
         who: &T::AccountId,
         sku: Sku,
@@ -113,6 +117,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Move an item from one location to another
     pub fn do_inventory_move(
         who: &T::AccountId,
         mut item: Item,
@@ -194,6 +199,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Adjust the quantity of an item in inventory
     pub fn do_inventory_adjust(
         who: &T::AccountId,
         issuer: Employee,
@@ -280,6 +286,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Insert a new recipe into storage
     pub fn do_insert_recipe(recipe: Recipe) -> DispatchResult {
         // Ensure SKU length does not exceed 16
         let sku_encoded_len = recipe.sku.encode().len();
@@ -295,6 +302,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Insert a new material into storage
     pub fn do_insert_material(material: Material) -> DispatchResult {
         // Check if the material already exists
         if <Materials<T>>::contains_key(&material.sku) {
@@ -307,6 +315,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Delete a material from storage
     pub fn do_delete_material(sku: Sku) -> DispatchResult {
         // Check if the material exists
         if !<Materials<T>>::contains_key(&sku) {
@@ -319,6 +328,7 @@ impl<T: Config> Pallet<T> {
         Ok(())
     }
 
+    /// Update a material in storage
     pub fn do_update_material(material: Material) -> DispatchResult {
         // Check if the material exists
         <Materials<T>>::mutate_exists(
