@@ -1,42 +1,65 @@
-//! # Template Pallet
+//! # Inventory Pallet
 //!
-//! A pallet with minimal functionality to help developers understand the essential components of
-//! writing a FRAME pallet. It is typically used in beginner tutorials or in Substrate template
-//! nodes as a starting point for creating a new pallet and **not meant to be used in production**.
+//! - [`Config`]
+//! - [`Call`]
 //!
 //! ## Overview
 //!
-//! This template pallet contains basic examples of:
-//! - declaring a storage item that stores a single `u32` value
-//! - declaring and using events
-//! - declaring and using errors
-//! - a dispatchable function that allows a user to set a new value to storage and emits an event
-//!   upon success
-//! - another dispatchable function that causes a custom error to be thrown
+//! The Inventory pallet provides a comprehensive inventory management system. It allows for
+//! the addition, movement, adjustment, and removal of items, along with the management of
+//! recipes and materials used for product assembly. This pallet provides functionalities to:
 //!
-//! Each pallet section is annotated with an attribute using the `#[pallet::...]` procedural macro.
-//! This macro generates the necessary code for a pallet to be aggregated into a FRAME runtime.
+//! - Insert new inventory items and materials.
+//! - Scrap defective or damaged items.
+//! - Adjust and move items within the inventory.
+//! - Manage recipes and materials.
 //!
-//! Learn more about FRAME macros [here](https://docs.substrate.io/reference/frame-macros/).
+//! ## Interface
 //!
-//! ### Pallet Sections
+//! ### Dispatchable Functions
 //!
-//! The pallet sections in this template are:
+//! - `inventory_insertion`: Insert a new inventory item.
+//! - `inventory_scrap`: Mark an item as scrapped with details.
+//! - `inventory_move`: Move an item to a different location.
+//! - `inventory_adjust`: Adjust the quantity or details of an inventory item.
+//! - `insert_recipe`: Add a recipe to the system.
+//! - `insert_material`: Add a new material to the system.
+//! - `delete_material`: Remove a material from the system.
+//! - `update_material`: Update the details of an existing material.
 //!
-//! - A **configuration trait** that defines the types and parameters which the pallet depends on
-//!   (denoted by the `#[pallet::config]` attribute). See: [`Config`].
-//! - A **means to store pallet-specific data** (denoted by the `#[pallet::storage]` attribute).
-//!   See: [`storage_types`].
-//! - A **declaration of the events** this pallet emits (denoted by the `#[pallet::event]`
-//!   attribute). See: [`Event`].
-//! - A **declaration of the errors** that this pallet can throw (denoted by the `#[pallet::error]`
-//!   attribute). See: [`Error`].
-//! - A **set of dispatchable functions** that define the pallet's functionality (denoted by the
-//!   `#[pallet::call]` attribute). See: [`dispatchables`].
+//! ## Storage
 //!
-//! Run `cargo doc --package pallet-template --open` to view this pallet's documentation.
+//! - `GlobalInventory`: Tracks the total quantity of each SKU.
+//! - `Inventory`: Stores detailed inventory data by SKU and serial number.
+//! - `ScrapInventory`: Tracks scrapped items, such as damaged or unusable items.
+//! - `AdjustInventory`: Tracks adjustments made to inventory items.
+//! - `Recipes`: Stores recipes for assembling products.
+//! - `Materials`: Stores materials used in recipes and assembly.
+//! - `InventoryLocale`: Maps locations to items and tracks inventory per location.
+//!
+//! ## Events
+//!
+//! - `AddNewItem`: Emitted when a new inventory item is added.
+//! - `ItemScrapped`: Emitted when an item is marked as scrapped.
+//! - `MoveItem`: Emitted when an item is moved to a new location.
+//! - `AdjustItem`: Emitted when an item's details are adjusted.
+//! - `AddRecipe`: Emitted when a new recipe is added.
+//! - `AddMaterial`: Emitted when a new material is added.
+//! - `DeleteMaterial`: Emitted when a material is deleted.
+//! - `UpdateMaterial`: Emitted when a material is updated.
+//!
+//! ## Errors
+//!
+//! - `InventoryNotFound`: The specified item was not found in the inventory.
+//! - `InsufficientInventory`: Not enough quantity of an item in the inventory.
+//! - `InvalidAdjustDetails`: Invalid adjustment details were provided.
+//! - `InventoryFull`: The inventory has reached its maximum capacity.
+//! - `LocationNotFound`: The specified location could not be found.
+//! - `MaterialAlreadyExists`: Attempted to insert a material that already exists.
+//! - `MaterialNotFound`: The specified material could not be located.
+//!
+//! This pallet uses `no_std` for compatibility with Wasm environments, a polkadot standard.
 
-// We make sure this pallet uses `no_std` for compiling to Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
 // Re-export pallet items so that they can be accessed from the crate namespace.

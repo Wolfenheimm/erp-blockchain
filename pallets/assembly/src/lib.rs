@@ -1,3 +1,51 @@
+//! # Assembly Pallet
+//!
+//! - [`Config`]
+//! - [`Call`]
+//!
+//! ## Overview
+//!
+//! The Assembly pallet facilitates product assembly and work order management within the runtime.
+//! It interacts with inventory management to stage, track, and assemble items.
+//! This pallet provides functionalities to:
+//!
+//! - Prepare staging areas for product assembly.
+//! - Create and manage work orders.
+//! - Assemble products using predefined recipes and components.
+//!
+//! ## Interface
+//!
+//! ### Dispatchable Functions
+//!
+//! - `assemble_product`: Assemble a product using inventory components and a work order.
+//! - `prepare_staging_area`: Prepare a staging area for a specific work order.
+//! - `create_work_order`: Create a new work order for assembly.
+//!
+//! ## Storage
+//!
+//! - `AssembledProducts`: Tracks completed products, including their Bill of Materials (BOM).
+//! - `StagingArea`: Stages components and equipment for specific work orders.
+//! - `WorkOrders`: Stores work orders for tracking and reference.
+//!
+//! ## Events
+//!
+//! - `ProductAssembled`: Emitted when a product is successfully assembled.
+//! - `PrepStaging`: Emitted when a staging area is prepared for assembly.
+//! - `AddWorkOrder`: Emitted when a new work order is added to the system.
+//!
+//! ## Errors
+//!
+//! - `InsufficientComponents`: Not enough components for assembly.
+//! - `AssemblyFailed`: General failure during the assembly process.
+//! - `WorkOrderNotFound`: The specified work order could not be located.
+//! - `StagingAreaNotFound`: Staging area for the work order is missing.
+//! - `ExceededMaxComponents`: The maximum number of components has been exceeded.
+//! - `InsufficientInventory`: Not enough inventory to complete the assembly.
+//! - `DescriptionTooLong`: The description is too long.
+//! - `WorkOrderNotFound`: The specified work order could not be located.
+//! - `BomConstructIssue`: Issue with the construction of the Bill of Materials.
+//!
+//! This pallet uses `no_std` for compatibility with Wasm environments, a polkadot standard.
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub use pallet::*;
