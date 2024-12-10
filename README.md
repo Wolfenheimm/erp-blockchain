@@ -103,6 +103,7 @@ The pallet provides error messages to handle issues such as:
 - **Add Tests**: Write unit and integration tests to ensure the correctness of inventory storage and event emission.
 - **Add Deletion Functionality**: Implement a dispatchable call to remove SKUs and their associated data.
 - **Optimize Storage**: Consider merging storage fields or using more efficient data structures for performance.
+- **New Modules**: Current WIP on Orders, Sales and Packaging
 
 ### Prerequisites
 
